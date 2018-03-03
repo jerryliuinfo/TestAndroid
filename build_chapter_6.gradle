@@ -1,0 +1,7 @@
+/*
+task ex65SourceSetTask.doLast {
+    sourceSets.all{
+        println name
+    }
+}
+*/

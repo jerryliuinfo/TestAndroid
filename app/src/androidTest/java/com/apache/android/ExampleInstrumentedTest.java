@@ -1,13 +1,14 @@
 package com.apache.android;
 
 import android.content.Context;
+import android.content.pm.PackageInfo;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Instrumentation test, which will execute on an Android device.
@@ -22,5 +23,14 @@ public class ExampleInstrumentedTest {
         Context appContext = InstrumentationRegistry.getTargetContext();
 
         assertEquals("com.apache.android", appContext.getPackageName());
+    }
+
+
+    @Test
+    public void testPackageName() throws Exception {
+        // Context of the app under test.
+        Context appContext = InstrumentationRegistry.getTargetContext();
+        PackageInfo packageInfo = appContext.getPackageManager().getPackageInfo(appContext.getPackageName(), 0);
+        System.out.println("version code = "+packageInfo.versionCode +", version name = "+ packageInfo.versionName);
     }
 }
