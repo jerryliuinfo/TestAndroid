@@ -17,6 +17,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".LeakActivityForInnerClass"/>
+
+        <activity android:name=".KnowledgeActivity"/>
+        <meta-data android:name="CHANNEL" android:value="${CHANNEL_VALUE}"/>
     </application>
 
 </manifest>

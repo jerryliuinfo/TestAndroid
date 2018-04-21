@@ -1,14 +1,21 @@
 package com.apache.android;
 
-import android.os.Binder;
+import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 
+import com.apache.android.download.emoji.EmojiBean;
+import com.apache.android.download.emoji.EmojiDownloaer;
+import com.apache.android.util.Logger;
+import com.apache.android.util.NLog;
+
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
@@ -21,16 +28,39 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        NLog.setDebug(true, Logger.DEBUG);
         setContentView(R.layout.activity_main);
         Button btn_md5 = (Button) findViewById(R.id.btn_md5);
         btn_md5.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                LeakActivityForInnerClass.launch(MainActivity.this);
+               // LeakActivityForInnerClass.launch(MainActivity.this);
+                KnowledgeActivity.launch(MainActivity.this);
+            }
+        });
+
+        findViewById(R.id.btn_download).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EmojiDownloaer downloaer = new EmojiDownloaer();
+                EmojiBean bean = new EmojiBean();
+                bean.setEmojiId(String.valueOf(1000));
+                List<String> urls = new ArrayList<>();
+                for (int i = 0; i < 10; i++){
+                    urls.add("www.baidu.com "+i );
+                }
+                bean.setEmojiUrls(urls);
+                downloaer.startDownload(bean);
             }
         });
 
 
+
+        try {
+            testManifest();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         Subscriber<String> subscriber = new Subscriber<String>() {
             @Override
@@ -157,12 +187,37 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-        tsub.start();
+    }
 
-        tadd.start();
-        Set set;
-        ArrayList arrayList;
-        LinkedList linkedList;
-        Binder binder;
+
+
+    public void testManifest() throws Exception {
+        // Context of the app under test.
+        String channelValue = getMetaData(this, "CHANNEL");
+        System.out.println("channelValue = "+channelValue);
+
+
+    }
+
+
+    /**
+     * 获取MetaData
+     */
+    public static String getMetaData(Context context, String name) {
+        PackageManager packageManager = context.getPackageManager();
+        ApplicationInfo applicationInfo;
+        Object value = null;
+        try {
+
+            applicationInfo = packageManager.getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
+            if (applicationInfo != null && applicationInfo.metaData != null) {
+                value = applicationInfo.metaData.get(name);
+            }
+
+        } catch (Exception e) {
+            return null;
+        }
+
+        return value == null ? null : value.toString();
     }
 }
