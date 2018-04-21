@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 
+import com.apache.android.aidl.BookManagerActivity;
 import com.apache.android.download.emoji.EmojiBean;
 import com.apache.android.download.emoji.EmojiDownloaer;
 import com.apache.android.util.Logger;
@@ -51,6 +52,13 @@ public class MainActivity extends AppCompatActivity {
                 }
                 bean.setEmojiUrls(urls);
                 downloaer.startDownload(bean);
+            }
+        });
+
+        findViewById(R.id.btn_aidl).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                BookManagerActivity.launch(MainActivity.this);
             }
         });
 

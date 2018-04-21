@@ -20,6 +20,13 @@
 
         <activity android:name=".KnowledgeActivity"/>
         <meta-data android:name="CHANNEL" android:value="${CHANNEL_VALUE}"/>
+
+
+        <service android:name=".aidl.BookManagerService"
+            android:splitName=":remote"
+            />
+
+        <activity android:name=".aidl.BookManagerActivity"/>
     </application>
 
 </manifest>

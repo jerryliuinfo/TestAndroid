@@ -1,6 +1,5 @@
 apply plugin: 'com.android.application'
 
-apply from : rootProject.file('build_chapter_6.gradle')
 
 android {
     compileSdkVersion 26
@@ -21,6 +20,13 @@ android {
         encoding 'utf-8'
 //        sourceCompatibility = JavaVersion.VERSION_1_8
 //        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+
+    sourceSets{
+        main{
+            java.srcDirs = ['src/main/java', 'src/main/aidl']
+        }
     }
 
     adbOptions{
@@ -53,41 +59,9 @@ android {
         }
     }
 
-    applicationVariants.all{ variant ->
-        variant.outputs.each { output ->
-            def outPutFile = output.outputFile;
-            if (outPutFile != null && outPutFile.name.endsWith(".apk")){
-                def flavorName = variant.flavorName;
-                def buildType = variant.buildType.name;
-                def publishVersionName = variant.versionName + "_"+variant.versionCode
-
-
-                def appVersionName = getAppVersionName();
-                println "appVersionName:${appVersionName}"
-
-                def apkName = "TestAndroid_${appVersionName}_${flavorName}_${buildType}.apk"
-                def apkFile = new File(outPutFile.getParent(), apkName)
-                //output.outputFile = apkFile
-
-
-            }
-        }
-
-    }
 
 }
 
-
-task ex65SourceSetTask << {
-    sourceSets.all{
-        println "sourceSets name is ${name}"
-    }
-}
-
-
-task ex65TestTask << {
-    println "ex65Test ${name}"
-}
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
@@ -107,27 +81,3 @@ dependencies {
 
 
 
-apply plugin: Ex53CustomPlugin
-
-class Ex53CustomPlugin implements Plugin<Project>{
-
-    @Override
-    void apply(Project target) {
-        target.task('ex53CustomTask').doLast(){
-            println '这是一个通过自定义插件创建的任务'
-        }
-    }
-}
-
-
-def buildTime(){
-    Date date = new Date();
-    def fromatDate = date.format("yyyyMMdd hh:mm:ss")
-}
-
-
-def getAppVersionName(){
-    //def cmd = 'git describe --abbrev=0 --tags'
-    def cmd = 'git rev-list HEAD --count';
-    return cmd.execute().text.trim();
-}
