@@ -48,6 +48,8 @@ public enum  Operation {
 
     //test1
 
+    //test2
+
 
     abstract double apply(double x, double y);
 
