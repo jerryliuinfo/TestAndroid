@@ -50,6 +50,8 @@ public enum  Operation {
 
     //test2
 
+    //test reset --hard HEAD
+
 
     abstract double apply(double x, double y);
 
