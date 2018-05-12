@@ -40,4 +40,18 @@
         android:text="test aidl"
         />
 
+    <Button
+        android:id="@+id/btn_thread_pool"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="test 线程池"
+        />
+
+
+    <Button
+        android:id="@+id/btn_custom_task"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="test 自定义WorkTask"
+        />
 </LinearLayout>

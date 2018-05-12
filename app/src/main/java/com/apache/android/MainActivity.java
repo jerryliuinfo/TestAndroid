@@ -1,9 +1,8 @@
 package com.apache.android;
 
-import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -11,21 +10,18 @@ import android.widget.Button;
 import com.apache.android.aidl.BookManagerActivity;
 import com.apache.android.download.emoji.EmojiBean;
 import com.apache.android.download.emoji.EmojiDownloaer;
+import com.apache.android.multithread.MyWorkTask;
+import com.apache.android.multithread.TaskException;
 import com.apache.android.util.Logger;
 import com.apache.android.util.NLog;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
-import java.util.Set;
-
-import rx.Observable;
-import rx.Observer;
-import rx.Subscriber;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
-
+    public static final String TAG = MainActivity.class.getSimpleName();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,169 +59,102 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-
-        try {
-            testManifest();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        Subscriber<String> subscriber = new Subscriber<String>() {
+        findViewById(R.id.btn_thread_pool).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onCompleted() {
+            public void onClick(View v) {
+                Executor executor = Executors.newFixedThreadPool(1);
 
-            }
 
-            @Override
-            public void onError(Throwable e) {
-
-            }
-
-            @Override
-            public void onNext(String s) {
-
-            }
-        };
-
-        Observable.create(new Observable.OnSubscribe<String>() {
-            @Override
-            public void call(Subscriber<? super String> subscriber) {
-
-            }
-        }).subscribe(new Observer<String>() {
-            @Override
-            public void onCompleted() {
-
-            }
-
-            @Override
-            public void onError(Throwable e) {
-
-            }
-
-            @Override
-            public void onNext(String s) {
+                for (int i = 0; i < 100; i ++){
+                    executor.execute(new MyRunnable(i));
+                }
 
             }
         });
-    }
+
+        new LoadDataTask().execute();
 
 
-    public static void main(String[] args) {
-        //testThreadSync();
-        testEqualsAndHashCode();
-        testBubbleSort();
-
-    }
-
-    private static int [] array = new int[]{20,10,13,15,24};
-
-    private static void testBubbleSort(){
-        int length = array.length;
-        int temp = 0;
-        for (int i = 0; i < length; i++) {
-            for (int j = i; j < length - i -1; j++){
-                if (array[j] > array[j+1]){
-                    temp = array[j];
-                    array[j] = array[j+1];
-                    array[j+1] = temp;
-                }
-            }
-        }
-        print();
-    }
-
-    private static void print(){
-        StringBuffer buffer = new StringBuffer();
-        for (int i = 0; i < array.length; i++) {
-            buffer.append(array[i]).append("-");
-        }
-        System.out.println(buffer.toString());
-    }
-
-
-    private static void testEqualsAndHashCode(){
-        Student s1 = new Student(1,"micro");
-        Student s2 = new Student(1,"micro");
-        Set<Student> set = new HashSet();
-        set.add(s1);
-        set.add(s2);
-        System.out.println(set.size());
-        System.out.println("s1 equals s2 = "+ s1.equals(s2));
-    }
-
-    private static void testThreadSync(){
-        final Bank bank = new Bank();
-
-        Thread tadd=new Thread(new Runnable() {
-
+        findViewById(R.id.btn_custom_task).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void run() {
-                // TODO Auto-generated method stub
-                while(true){
-                    try {
-                        Thread.sleep(new Random().nextInt(500));
-                    } catch (InterruptedException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                    bank.addMoney(100);
-                    bank.lookMoney();
-                    System.out.println("\n");
+            public void onClick(View v) {
+                new CustomWorkTask().executor("zhangsan");
 
-                }
+
             }
         });
 
-        Thread tsub = new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                // TODO Auto-generated method stub
-                while(true){
-                    bank.subMoney(100);
-                    bank.lookMoney();
-                    System.out.println("\n");
-                    try {
-                        Thread.sleep(new Random().nextInt(400));
-                    } catch (InterruptedException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                }
-            }
-        });
-    }
 
 
-
-    public void testManifest() throws Exception {
-        // Context of the app under test.
-        String channelValue = getMetaData(this, "CHANNEL");
-        System.out.println("channelValue = "+channelValue);
 
 
     }
 
 
-    /**
-     * 获取MetaData
-     */
-    public static String getMetaData(Context context, String name) {
-        PackageManager packageManager = context.getPackageManager();
-        ApplicationInfo applicationInfo;
-        Object value = null;
-        try {
+    class CustomWorkTask extends MyWorkTask<String,Void,String>{
 
-            applicationInfo = packageManager.getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
-            if (applicationInfo != null && applicationInfo.metaData != null) {
-                value = applicationInfo.metaData.get(name);
-            }
+        @Override
+        protected void onPrepare() {
+            super.onPrepare();
+            NLog.d(TAG, "onPrepare thread = %s", Thread.currentThread().getName());
+        }
 
-        } catch (Exception e) {
+        @Override
+        public String workInBackground(String... params) throws TaskException {
+            String param1 = params[0];
+            NLog.d(TAG, "workInBackground thread = %s, param1 = %s", Thread.currentThread().getName(), param1);
+
+            return "haha";
+        }
+
+        @Override
+        protected void onSuccess(String s) {
+            super.onSuccess(s);
+            NLog.d(TAG, "onSuccess thread = %s, result = %s", Thread.currentThread().getName(), s);
+
+        }
+
+        @Override
+        protected void onFailure(TaskException exception) {
+            super.onFailure(exception);
+            NLog.d(TAG, "onFailure thread = %s", Thread.currentThread().getName());
+
+        }
+
+        @Override
+        protected void onFinished() {
+            super.onFinished();
+            NLog.d(TAG, "onFinished thread = %s", Thread.currentThread().getName());
+
+        }
+    }
+
+    class LoadDataTask extends AsyncTask<Void,Void,Void>{
+
+        @Override
+        protected Void doInBackground(Void... params) {
             return null;
         }
-
-        return value == null ? null : value.toString();
     }
+
+    private static class MyRunnable implements Runnable{
+
+        private int index;
+
+        public MyRunnable(int index) {
+            this.index = index;
+        }
+
+        @Override
+        public void run() {
+            SystemClock.sleep(50);
+            NLog.d(TAG, "thread %s run", String.valueOf(index));
+        }
+    }
+
+
+
+
+
+
 }
